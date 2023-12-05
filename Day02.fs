@@ -70,5 +70,19 @@ let sum =
 
 printfn $"{sum}"
 
+let power (game: Game) =
+    game.rounds
+        |> List.fold
+            (fun acc r -> {
+                Round.green = max acc.green r.green;
+                Round.red = max acc.red r.red;
+                Round.blue = max acc.blue r.blue;
+            }) { Round.red = 0; green = 0; blue = 0 }
+        |> fun r -> r.green * r.red * r.blue
 
+let sum2 =
+    games
+        |> List.map power
+        |> List.sum
 
+printfn $"{sum2}"

@@ -2,6 +2,11 @@
 
 let lines = readlines "./Day02.txt" |> List.ofSeq
 
+let split (str: string) (sep: char) =
+    str.Split sep
+        |> List.ofArray
+        |> List.map (fun t -> t.Trim())
+
 type Round = {
     red: int
     green: int
@@ -19,13 +24,9 @@ let parseGameId (header: string) =
     | _ -> invalidOp "bad header"
 
 let parseDraw (draw: string) : (string * int) =
-    let draw =
-        draw.Split ' '
-        |> List.ofArray
-        |> List.map (fun t -> t.Trim())
-    match draw with
-    | [n; color] -> (color, (System.Convert.ToInt32 n))
-    | _ -> invalidOp "adf"
+    match (split draw ' ') with
+        | [n; color] -> (color, (System.Convert.ToInt32 n))
+        | _ -> invalidOp "adf"
 
 let rec parseRound (round: Round) (rounds: list<(string * int)>): Round =
     match rounds with
@@ -42,27 +43,19 @@ let rec parseRound (round: Round) (rounds: list<(string * int)>): Round =
 
 let parseRoundStr (round: string) : Round =
     let emptyRound = { Round.red = 0; Round.green = 0; Round.blue = 0 }
-    round.Split ','
-        |> List.ofArray
-        |> List.map (fun t -> t.Trim())
+    split round ','
         |> List.map parseDraw
         |> parseRound emptyRound
 
 let parseRounds (rounds: string) =
-    rounds.Split ';'
-        |> List.ofArray
-        |> List.map (fun t -> t.Trim())
-        |> List.map parseRoundStr
+    split rounds ';' |> List.map parseRoundStr
 
 let parseline (line: string): Game =
-    match List.ofArray (line.Split ':') with
+    match split line ':' with
     | [id; draws] -> { Game.id = parseGameId id; Game.rounds = parseRounds draws }
     | _ -> invalidOp "bad line"
 
-let games =
-    lines
-        |> List.map parseline
-
+let games = List.map parseline lines
 
 let rec possibleGame (rounds: list<Round>) =
     match rounds with
